@@ -1,14 +1,23 @@
 #!/usr/bin/env bash
-#
-# Capture and print stdout, since gofmt doesn't use proper exit codes
-#
-set -e -o pipefail
 
-if ! command -v gofmt &> /dev/null ; then
-    echo "gofmt not installed or available in the PATH" >&2
-    exit 1
+set -euo pipefail
+
+fail() {
+  printf "Go formatting failed.\n"
+  exit 1
+}
+
+if ! command -v gofmt &> /dev/null; then
+  printf "gofmt not installed or available in the PATH\n" >&2
+  exit 1
 fi
 
-output="$(gofmt -l -w "$@")"
-echo "$output"
-[[ -z "$output" ]]
+# Run gofmt and capture the output
+output=$(gofmt -l -w "$@") || fail
+printf "%s\n" "$output"
+
+if [[ -z "$output" ]]; then
+  printf "All files are correctly formatted.\n"
+else
+  fail
+fi

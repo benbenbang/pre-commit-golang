@@ -1,15 +1,25 @@
 #!/usr/bin/env bash
-#
-# Capture and print stdout, since goimports doesn't use proper exit codes
-#
-set -e -o pipefail
 
-if ! command -v goimports &> /dev/null ; then
-    echo "goimports not installed or available in the PATH" >&2
-    echo "please check https://pkg.go.dev/golang.org/x/tools/cmd/goimports" >&2
-    exit 1
+set -euo pipefail
+
+fail() {
+  printf "Go imports failed\n"
+  exit 1
+}
+
+if ! command -v goimports &> /dev/null; then
+  printf "goimports not installed or available in the PATH\n" >&2
+  printf "please check https://pkg.go.dev/golang.org/x/tools/cmd/goimports\n" >&2
+  exit 1
 fi
 
-output="$(goimports -l -w "$@")"
-echo "$output"
-[[ -z "$output" ]]
+DIR=${1:-.}
+
+output=$(goimports -l -w "$DIR") || fail
+printf "%s\n" "$output"
+
+if [[ -z "$output" ]]; then
+  printf "All imports are correctly formatted\n"
+else
+  fail
+fi
