@@ -59,5 +59,8 @@ Additional tools as listed in the hook descriptions
 ## Contributing
 Contributions are welcome! Please feel free to submit a Pull Request.
 
+## Acknowledgments
+This project is based on [dnephin/pre-commit-golang](https://github.com/dnephin/pre-commit-golang), originally created by Daniel Nephin. It has been substantially modified and modernized.
+
 ## License
 This project is licensed under the MIT License - see the LICENSE file for details.
