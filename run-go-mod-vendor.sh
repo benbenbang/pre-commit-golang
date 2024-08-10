@@ -7,9 +7,21 @@ fail() {
   exit 1
 }
 
-go mod vendor
+printf "Running go mod vendor in .\n"
+vendor_output=$(go mod vendor 2>&1)
+vendor_status=$?
 
-if ! git diff --exit-code vendor &> /dev/null; then
+if [[ $vendor_status -ne 0 && $vendor_output != *"no dependencies to vendor"* ]]; then
+  printf "%s\n" "$vendor_output"
+  fail
+fi
+
+if [[ $vendor_output == *"no dependencies to vendor"* ]]; then
+  printf "No dependencies to vendor. Skipping vendor check.\n"
+  exit 0
+fi
+
+if ! git diff --quiet vendor; then
   fail
 fi
 

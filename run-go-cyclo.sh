@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -euo pipefail  # Exit immediately if a command exits with a non-zero status, and catch unset variables.
+set -euo pipefail
 
 fail() {
   printf "Go cyclomatic complexity analysis failed.\n"
@@ -14,15 +14,30 @@ if ! command -v gocyclo &> /dev/null; then
   exit 1
 fi
 
-# Check if any arguments are supplied
-if [ $# -eq 0 ]; then
-  printf "No arguments supplied\n"
-  printf "Please add \`args: [-over=15]\` in your pre-commit config\n"
-  exit 1
+# Default threshold
+THRESHOLD=15
+
+# Parse arguments
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    -over=*)
+      THRESHOLD="${1#*=}"
+      shift
+      ;;
+    *)
+      ARGS+=("$1")
+      shift
+      ;;
+  esac
+done
+
+# If no directory is specified, use current directory
+if [ ${#ARGS[@]} -eq 0 ]; then
+  ARGS+=(".")
 fi
 
 # Execute gocyclo with provided arguments
-if ! gocyclo "$@"; then
+if ! gocyclo -over $THRESHOLD "${ARGS[@]}"; then
   fail
 fi
 

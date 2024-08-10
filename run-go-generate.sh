@@ -7,12 +7,17 @@ fail() {
   exit 1
 }
 
-if [ $# -eq 0 ]; then
-  printf "No arguments supplied. Please provide the packages or directories to run go generate on.\n"
-  exit 1
+# Find all directories containing Go files, excluding vendor and hidden directories
+GO_DIRS=$(find . -type f -name "*.go" -not -path "*/vendor/*" -not -path "*/.*/*" | xargs -n1 dirname | sort -u)
+
+if [[ -z "${GO_DIRS}" ]]; then
+  printf "No Go directories found.\n"
+  exit 0
 fi
 
-# Run go generate on each provided argument
-echo "$@" | xargs -n1 go generate || fail
+for dir in ${GO_DIRS}; do
+  printf "Running go generate in %s\n" "$dir"
+  (cd "$dir" && go generate ./...) || fail
+done
 
-printf "Go generate completed successfully.\n"
+printf "Go generate completed successfully in all directories.\n"

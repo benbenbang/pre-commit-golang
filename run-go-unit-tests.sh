@@ -1,27 +1,20 @@
 #!/usr/bin/env bash
 
-set -euo pipefail  # Exit immediately if a command exits with a non-zero status, and catch unset variables.
+set -euo pipefail
 
 fail() {
-  printf "Go vet failed for one or more directories.\n"
+  printf "Go unit tests failed.\n"
   exit 1
 }
 
-DIR=${1:-.}
-
-FILES=$(find "${DIR}" -type f -name "*.go" ! -path "*/vendor/*")
-
-if [[ -z "${FILES}" ]]; then
-  printf "No Go files found in the specified directory\n"
-  exit 0
-fi
-
-DIRS=$(dirname ${FILES} | sort -u)
+# Find all directories containing Go files, excluding vendor and hidden directories
+DIRS=$(find . -type f -name "*.go" -not -path "*/vendor/*" -not -path "*/.*/*" | xargs -n1 dirname | sort -u)
 
 for dir in ${DIRS}; do
-  if ! go vet "./${dir}"; then
+  printf "Running tests in %s\n" "$dir"
+  if ! go test -v "./${dir}/..."; then
     fail
   fi
 done
 
-printf "Go vet succeeded for all directories.\n"
+printf "All Go unit tests passed successfully.\n"

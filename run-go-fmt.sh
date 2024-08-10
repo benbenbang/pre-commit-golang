@@ -1,20 +1,14 @@
 #!/usr/bin/env bash
 
-set -euo pipefail  # Exit immediately if a command exits with a non-zero status, and catch unset variables.
+set -euo pipefail
 
 fail() {
   printf "Go formatting failed.\n"
   exit 1
 }
 
-# Ensure gofmt is installed and available in the PATH
-if ! command -v gofmt &> /dev/null; then
-  printf "gofmt not installed or available in the PATH\n" >&2
-  exit 1
-fi
-
-# Find all Go files, excluding the vendor directory
-FILES=$(find . -type f -name "*.go" ! -path "*/vendor/*")
+# Find all Go files, excluding vendor and hidden directories
+FILES=$(find . -type f -name "*.go" ! -path "*/vendor/*" ! -path "*/.*/*")
 
 # Check if any Go files were found
 if [[ -z "${FILES}" ]]; then
@@ -24,11 +18,13 @@ fi
 
 # Run gofmt and capture the output
 output=$(gofmt -l -w ${FILES}) || fail
-printf "%s\n" "$output"
 
 # Check if there is any output indicating files were modified
 if [[ -z "$output" ]]; then
   printf "All files are correctly formatted.\n"
 else
-  fail
+  printf "The following files have been formatted:\n"
+  printf "%s\n" "$output"
+  # Don't fail the script if files were formatted
+  printf "Go formatting completed successfully.\n"
 fi

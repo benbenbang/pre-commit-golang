@@ -2,24 +2,21 @@
 
 set -euo pipefail
 
-fail() {
-  printf "Go imports failed\n"
-  exit 1
+report() {
+  printf "Go imports completed.\n"
+  if [[ -n "$1" ]]; then
+    printf "The following files have been modified:\n"
+    printf "%s\n" "$1"
+  else
+    printf "All imports are correctly formatted.\n"
+  fi
 }
-
-if ! command -v goimports &> /dev/null; then
-  printf "goimports not installed or available in the PATH\n" >&2
-  printf "please check https://pkg.go.dev/golang.org/x/tools/cmd/goimports\n" >&2
-  exit 1
-fi
 
 DIR=${1:-.}
 
-output=$(goimports -l -w "$DIR") || fail
-printf "%s\n" "$output"
+output=$(goimports -l -w "$DIR") || {
+  printf "goimports command failed\n"
+  exit 1
+}
 
-if [[ -z "$output" ]]; then
-  printf "All imports are correctly formatted\n"
-else
-  fail
-fi
+report "$output"

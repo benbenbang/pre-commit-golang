@@ -1,16 +1,18 @@
 #!/usr/bin/env bash
 
-set -e
+set -euo pipefail
 
 fail() {
   printf "Go build failed\n"
   exit 1
 }
 
-DIR=${1:-.}
+# Find all directories containing go.mod files
+MOD_DIRS=$(find . -name go.mod -exec dirname {} \;)
 
-FILES=$(go list ${DIR}/... | grep -v /vendor/) || fail
+for dir in ${MOD_DIRS}; do
+  printf "Building in %s\n" "$dir"
+  (cd "$dir" && go build ./... ) || fail
+done
 
-go build ${FILES} || fail
-
-printf "Go build succeeded\n"
+printf "Go build succeeded for all modules\n"

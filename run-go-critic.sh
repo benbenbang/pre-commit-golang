@@ -9,19 +9,20 @@ fail() {
 
 if ! command -v gocritic &> /dev/null; then
   printf "gocritic not installed or available in the PATH\n" >&2
-  printf "please check https://github.com/go-critic/go-critic\n" >&2
+  printf "please install it using: go install github.com/go-critic/go-critic/cmd/gocritic@latest\n" >&2
   exit 1
 fi
 
-failed=false
-for file in "$@"; do
-  if ! gocritic check "$file" 2>&1; then
-    failed=true
-  fi
-done
+# Find all Go files, excluding vendor and hidden directories
+GO_FILES=$(find . -type f -name "*.go" -not -path "*/vendor/*" -not -path "*/.*/*")
 
-# Check if any file failed the gocritic check
-if [[ $failed == "true" ]]; then
+if [[ -z "${GO_FILES}" ]]; then
+  printf "No Go files found.\n"
+  exit 0
+fi
+
+# Run gocritic on all files
+if ! gocritic check ${GO_FILES}; then
   fail
 fi
 
