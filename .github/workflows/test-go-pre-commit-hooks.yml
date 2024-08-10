@@ -1,0 +1,45 @@
+name: Test Go Scripts
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+      matrix:
+        go-version: ["1.19", "1.20", "1.21", "1.22"]
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: ${{ matrix.go-version }}
+
+      - name: Install bats-core
+        run: |
+          git clone https://github.com/bats-core/bats-core.git
+          cd bats-core
+          ./install.sh $HOME
+          echo "$HOME/bin" >> $GITHUB_PATH
+
+      - name: Install Go tools
+        run: |
+          go install golang.org/x/tools/cmd/goimports@latest
+          go install github.com/fzipp/gocyclo/cmd/gocyclo@latest
+          go install github.com/go-critic/go-critic/cmd/gocritic@latest
+          curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.55.2
+          go install honnef.co/go/tools/cmd/staticcheck@latest
+
+      - name: Make scripts executable
+        run: chmod +x run-*.sh
+
+      - name: Run tests
+        run: bats tests.bats
