@@ -1,9 +1,14 @@
 pre-commit-golang
 =================
 
-:rotating_light: Please see the project sunsetting announcement:
-[Issues/98](https://github.com/dnephin/pre-commit-golang/issues/98)
-:rotating_light:
+
+
+Modernize the original version of [dnephin/pre-commit-golang](https://github.com/dnephin/pre-commit-golang).
+
+- Make sure it can handle nested directory like `cmd/xxx/yyy.go`
+- Better failure handle
+
+
 
 ----
 

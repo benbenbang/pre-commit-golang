@@ -1,11 +1,20 @@
 #!/usr/bin/env bash
 
-set -eu -o pipefail
+set -euo pipefail
 
-if ! command -v golangci-lint &> /dev/null ; then
-    echo "golangci-lint not installed or available in the PATH" >&2
-    echo "please check https://github.com/golangci/golangci-lint" >&2
-    exit 1
+fail() {
+  printf "Golangci-lint failed.\n"
+  exit 1
+}
+
+if ! command -v golangci-lint &> /dev/null; then
+  printf "golangci-lint not installed or available in the PATH\n" >&2
+  printf "please check https://golangci-lint.run/usage/install/\n" >&2
+  exit 1
 fi
 
-exec golangci-lint run "$@"
+if ! golangci-lint run "$@"; then
+  fail
+fi
+
+printf "Golangci-lint completed successfully.\n"
