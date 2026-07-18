@@ -7,9 +7,14 @@ fail() {
   exit 1
 }
 
-if ! command -v gocritic &> /dev/null; then
-  printf "gocritic not installed or available in the PATH\n" >&2
-  printf "please install it using: go install github.com/go-critic/go-critic/cmd/gocritic@latest\n" >&2
+if command -v go-critic >/dev/null 2>&1; then
+  GO_CRITIC_BIN=go-critic
+elif command -v gocritic >/dev/null 2>&1; then
+  # Compatibility with go-critic releases before the executable was renamed.
+  GO_CRITIC_BIN=gocritic
+else
+  printf "go-critic not installed or available in the PATH\n" >&2
+  printf "please install it using: go install github.com/go-critic/go-critic/cmd/go-critic@latest\n" >&2
   exit 1
 fi
 
@@ -23,7 +28,7 @@ if ((${#go_files[@]} == 0)); then
   exit 0
 fi
 
-if ! gocritic check "${go_files[@]}"; then
+if ! "$GO_CRITIC_BIN" check "${go_files[@]}"; then
   fail
 fi
 
