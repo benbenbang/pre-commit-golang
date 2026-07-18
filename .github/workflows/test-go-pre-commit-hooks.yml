@@ -11,6 +11,8 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    env:
+      GO_TOOLS_CACHE_VERSION: goimports-0.42.0-gocyclo-0.6.0-gocritic-0.14.3-staticcheck-2025.1.1-golangci-2.12.2
     strategy:
       fail-fast: true
       matrix:
@@ -22,6 +24,19 @@ jobs:
         uses: actions/setup-go@v6
         with:
           go-version: ${{ matrix.go-version }}
+          cache: false
+
+      - name: Restore installed Go tools
+        id: go-tools-cache
+        uses: actions/cache@v5
+        with:
+          path: |
+            ~/go/bin
+            ~/go/pkg/mod
+            ~/.cache/go-build
+          key: ${{ runner.os }}-${{ runner.arch }}-go${{ matrix.go-version }}-tools-${{ env.GO_TOOLS_CACHE_VERSION }}
+          restore-keys: |
+            ${{ runner.os }}-${{ runner.arch }}-go${{ matrix.go-version }}-tools-
 
       - name: Install bats-core
         run: |
@@ -31,6 +46,7 @@ jobs:
           echo "$HOME/bin" >> $GITHUB_PATH
 
       - name: Install Go tools
+        if: steps.go-tools-cache.outputs.cache-hit != 'true'
         run: |
           go install golang.org/x/tools/cmd/goimports@v0.42.0
           go install github.com/fzipp/gocyclo/cmd/gocyclo@v0.6.0
