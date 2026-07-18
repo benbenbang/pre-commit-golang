@@ -64,11 +64,13 @@ run_script() {
 }
 
 @test "run-go-fmt.sh" {
-  run_script "run-go-fmt.sh" .
+  mkdir -p "nested package"
+  cp main.go "nested package/second.go"
+  run_script "run-go-fmt.sh" main.go "nested package/second.go"
   echo "Output: $output"
   echo "Status: $status"
   [ "$status" -eq 0 ]
-  [[ "$output" == *"Go formatting completed successfully"* ]] || [[ "$output" == *"All files are correctly formatted"* ]] || [[ "$output" == *"No Go files found"* ]]
+  [[ "$output" == *"Go formatting completed successfully"* ]] || [[ "$output" == *"All files are correctly formatted"* ]] || [[ "$output" == *"No Go files to format"* ]]
 }
 
 @test "run-go-generate.sh" {
