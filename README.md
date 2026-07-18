@@ -1,10 +1,12 @@
 # pre-commit-golang
 
-A modernized version of [dnephin/pre-commit-golang](https://github.com/dnephin/pre-commit-golang), updated to handle nested directory structures and provide better failure handling.
+A collection of pre-commit hooks for modern Go repositories, including nested
+packages, paths containing spaces, and repositories with multiple Go modules.
 
 ## Features
 
-- Handles nested directory structures like `cmd/xxx/yyy.go`
+- Formats exactly the staged files supplied by pre-commit
+- Safely handles nested paths and paths containing spaces
 - Improved failure handling for more robust checks
 - Compatible with modern Go project layouts
 - Supports multiple Go modules within a repository
@@ -20,13 +22,15 @@ Add this to your `.pre-commit-config.yaml`:
     - id: go-fmt
     - id: go-vet
     - id: go-imports
-    - id: go-lint # this is actually running staticcheck
+    - id: go-lint # runs staticcheck
     - id: go-cyclo
       args: [-over=15]
     - id: validate-toml
     - id: golangci-lint
     - id: go-critic
     - id: go-unit-tests
+    - id: go-unit-tests-args
+      args: [-race, -count=1]
     - id: go-build
     - id: go-mod-tidy
     - id: go-mod-vendor
@@ -39,21 +43,25 @@ Add this to your `.pre-commit-config.yaml`:
 - `go-lint` - Run `staticcheck`, requires staticcheck
 - `go-cyclo` - Runs `gocyclo`, requires github.com/fzipp/gocyclo
 - `validate-toml` - Runs `tomlv`, requires github.com/BurntSushi/toml/tree/master/cmd/tomlv
-- `golangci-lint` - Runs `golangci-lint run ./...`, requires golangci-lint
-- `go-critic` - Runs `gocritic check ./..`., requires go-critic
-- `go-unit-tests` - Runs `go test -tags=unit -timeout 30s -short -v`
+- `golangci-lint` - Runs `golangci-lint run` in every module, requires golangci-lint
+- `go-critic` - Runs `gocritic check` on staged Go files, requires go-critic
+- `go-unit-tests` - Runs `go test -v ./...` in every module
+- `go-unit-tests-args` - Runs `go test <args> ./...` in every module
 - `go-build` - Runs `go build`, requires Go
 - `go-mod-tidy` - Runs `go mod tidy -v`, requires Go
 - `go-mod-vendor` - Runs `go mod vendor`, requires Go
 
-## Improvements
-Nested Directory Support: All hooks now properly handle nested directory structures, including cmd/xxx/yyy.go.
-Multi-Module Support: Hooks are designed to work with repositories containing multiple Go modules.
-Improved Error Handling: Scripts now provide more informative error messages and handle edge cases more gracefully.
-Consistent Output: All hooks provide consistent and clear output, making it easier to identify and resolve issues.
+Hooks which naturally operate on files (`go-fmt`, `go-imports`, `go-critic`, and
+`go-cyclo`) use the repository-relative filenames passed by pre-commit. Hooks
+which operate on packages or modules run once across every module and do not
+accept pre-commit's filename arguments. `vendor` and `.git` directories are
+excluded when modules are discovered.
+
+Module discovery uses [`fd`](https://github.com/sharkdp/fd) when it is available
+and falls back to POSIX `find`; installing `fd` is optional.
 
 ## Requirements
-**Go 1.19** or later
+**Go 1.24** or later
 Additional tools as listed in the hook descriptions
 
 ## Contributing

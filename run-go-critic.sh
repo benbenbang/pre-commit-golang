@@ -13,16 +13,17 @@ if ! command -v gocritic &> /dev/null; then
   exit 1
 fi
 
-# Find all Go files, excluding vendor and hidden directories
-GO_FILES=$(find . -type f -name "*.go" -not -path "*/vendor/*" -not -path "*/.*/*")
+go_files=()
+for file in "$@"; do
+  [[ $file == *.go && -f $file && $file != */vendor/* ]] && go_files+=("$file")
+done
 
-if [[ -z "${GO_FILES}" ]]; then
-  printf "No Go files found.\n"
+if ((${#go_files[@]} == 0)); then
+  printf 'No Go files to analyze.\n'
   exit 0
 fi
 
-# Run gocritic on all files
-if ! gocritic check ${GO_FILES}; then
+if ! gocritic check "${go_files[@]}"; then
   fail
 fi
 

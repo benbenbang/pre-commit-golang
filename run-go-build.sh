@@ -2,17 +2,11 @@
 
 set -euo pipefail
 
-fail() {
-  printf "Go build failed\n"
+source "$(dirname "${BASH_SOURCE[0]}")/_go-hook-lib.sh"
+
+run_in_go_modules "Building" go build ./... || {
+  printf 'Go build failed.\n'
   exit 1
 }
-
-# Find all directories containing go.mod files
-MOD_DIRS=$(find . -name go.mod -exec dirname {} \;)
-
-for dir in ${MOD_DIRS}; do
-  printf "Building in %s\n" "$dir"
-  (cd "$dir" && go build ./... ) || fail
-done
 
 printf "Go build succeeded for all modules\n"
