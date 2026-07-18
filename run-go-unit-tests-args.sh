@@ -2,12 +2,11 @@
 
 set -euo pipefail
 
-IFS=' ' read -ra args <<< "${1:-}"
+source "$(dirname "${BASH_SOURCE[0]}")/_go-hook-lib.sh"
 
-# Run the go test command
-if ! go test "${args[@]}" ./...; then
-  echo "Go unit tests failed."
+if ! run_in_go_modules "Running tests" go test "$@" ./...; then
+  printf 'Go unit tests failed.\n'
   exit 1
 fi
 
-echo "All Go unit tests passed successfully."
+printf 'All Go unit tests passed successfully.\n'

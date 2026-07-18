@@ -16,6 +16,7 @@ fi
 
 # Default threshold
 THRESHOLD=15
+ARGS=()
 
 # Parse arguments
 while [[ $# -gt 0 ]]; do
@@ -32,12 +33,13 @@ while [[ $# -gt 0 ]]; do
 done
 
 # If no directory is specified, use current directory
-if [ ${#ARGS[@]} -eq 0 ]; then
-  ARGS+=(".")
+if ((${#ARGS[@]} == 0)); then
+  printf 'No Go files to analyze.\n'
+  exit 0
 fi
 
 # Execute gocyclo with provided arguments
-if ! gocyclo -over $THRESHOLD "${ARGS[@]}"; then
+if ! gocyclo -over "$THRESHOLD" "${ARGS[@]}"; then
   fail
 fi
 

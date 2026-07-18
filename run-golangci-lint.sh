@@ -2,19 +2,17 @@
 
 set -euo pipefail
 
-fail() {
-  echo "Golangci-lint failed."
-  exit 1
-}
-
 if ! command -v golangci-lint &> /dev/null; then
   echo "golangci-lint not installed or available in the PATH"
   echo "please check https://golangci-lint.run/usage/install/"
   exit 1
 fi
 
-if golangci-lint run "$@"; then
-  echo "Golangci-lint completed successfully."
-else
-  fail
-fi
+source "$(dirname "${BASH_SOURCE[0]}")/_go-hook-lib.sh"
+
+run_in_go_modules "Running golangci-lint" golangci-lint run "$@" || {
+  printf 'Golangci-lint failed.\n'
+  exit 1
+}
+
+printf 'Golangci-lint completed successfully.\n'

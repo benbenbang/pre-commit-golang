@@ -2,22 +2,20 @@
 
 set -euo pipefail
 
-fail() {
-  printf "Go formatting failed.\n"
-  exit 1
-}
+files=()
+for file in "$@"; do
+  [[ $file == *.go && -f $file && $file != */vendor/* ]] && files+=("$file")
+done
 
-# Find all Go files, excluding vendor and hidden directories
-FILES=$(find . -type f -name "*.go" ! -path "*/vendor/*" ! -path "*/.*/*")
-
-# Check if any Go files were found
-if [[ -z "${FILES}" ]]; then
-  printf "No Go files found in the specified directory\n"
+if ((${#files[@]} == 0)); then
+  printf 'No Go files to format.\n'
   exit 0
 fi
 
-# Run gofmt and capture the output
-output=$(gofmt -l -w ${FILES}) || fail
+output=$(gofmt -l -w -- "${files[@]}") || {
+  printf 'Go formatting failed.\n'
+  exit 1
+}
 
 # Check if there is any output indicating files were modified
 if [[ -z "$output" ]]; then

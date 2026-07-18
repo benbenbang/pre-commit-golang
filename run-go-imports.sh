@@ -12,9 +12,17 @@ report() {
   fi
 }
 
-DIR=${1:-.}
+files=()
+for file in "$@"; do
+  [[ $file == *.go && -f $file && $file != */vendor/* ]] && files+=("$file")
+done
 
-output=$(goimports -l -w "$DIR") || {
+if ((${#files[@]} == 0)); then
+  printf 'No Go files to organize.\n'
+  exit 0
+fi
+
+output=$(goimports -l -w -- "${files[@]}") || {
   printf "goimports command failed\n"
   exit 1
 }

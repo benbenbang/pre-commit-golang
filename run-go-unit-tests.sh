@@ -2,19 +2,11 @@
 
 set -euo pipefail
 
-fail() {
-  printf "Go unit tests failed.\n"
+source "$(dirname "${BASH_SOURCE[0]}")/_go-hook-lib.sh"
+
+run_in_go_modules "Running tests" go test -v ./... || {
+  printf 'Go unit tests failed.\n'
   exit 1
 }
-
-# Find all directories containing Go files, excluding vendor and hidden directories
-DIRS=$(find . -type f -name "*.go" -not -path "*/vendor/*" -not -path "*/.*/*" | xargs -n1 dirname | sort -u)
-
-for dir in ${DIRS}; do
-  printf "Running tests in %s\n" "$dir"
-  if ! go test -v "./${dir}/..."; then
-    fail
-  fi
-done
 
 printf "All Go unit tests passed successfully.\n"

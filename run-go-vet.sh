@@ -2,17 +2,11 @@
 
 set -euo pipefail
 
-fail() {
-  printf "Go vet failed for one or more packages.\n"
+source "$(dirname "${BASH_SOURCE[0]}")/_go-hook-lib.sh"
+
+run_in_go_modules "Running go vet" go vet ./... || {
+  printf 'Go vet failed for one or more modules.\n'
   exit 1
 }
-
-# Find all directories containing go.mod files
-MOD_DIRS=$(find . -name go.mod -exec dirname {} \;)
-
-for dir in ${MOD_DIRS}; do
-  printf "Running go vet in %s\n" "$dir"
-  (cd "$dir" && go vet ./...) || fail
-done
 
 printf "Go vet succeeded for all packages.\n"
