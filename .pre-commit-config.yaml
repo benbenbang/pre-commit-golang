@@ -28,6 +28,6 @@ repos:
       - id: validate-commit-msg
         name: Commit Message is Valid
         language: pygrep
-        entry: ^(build|ci|docs|feat|fix|perf|refactor|style|test|ops|hotfix|release|chore)\([\w,\.,\-,\(,\),\/]+\)(!?)(:)\s{1}([\w,\W,:]+)$
+        entry: ^(build|ci|docs|feat|fix|perf|refactor|style|test|ops|hotfix|release|chore|incompat)\([\w,\.,\-,\(,\),\/]+\)(!?)(:)\s{1}([\w,\W,:]+)$
         stages: [commit-msg]
         args: [--negate]
