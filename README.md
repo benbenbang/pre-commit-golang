@@ -43,22 +43,19 @@ Add this to your `.pre-commit-config.yaml`:
 - `go-lint` - Run `staticcheck`, requires staticcheck
 - `go-cyclo` - Runs `gocyclo`, requires github.com/fzipp/gocyclo
 - `validate-toml` - Runs `tomlv`, requires github.com/BurntSushi/toml/tree/master/cmd/tomlv
-- `golangci-lint` - Runs `golangci-lint run` in every module, requires golangci-lint
+- `golangci-lint` - Runs `golangci-lint run` in each selected module, requires golangci-lint
 - `go-critic` - Runs `gocritic check` on staged Go files, requires go-critic
-- `go-unit-tests` - Runs `go test -v ./...` in every module
-- `go-unit-tests-args` - Runs `go test <args> ./...` in every module
+- `go-unit-tests` - Runs `go test -v ./...` in each selected module
+- `go-unit-tests-args` - Runs `go test <args> ./...` in each selected module
 - `go-build` - Runs `go build`, requires Go
 - `go-mod-tidy` - Runs `go mod tidy -v`, requires Go
 - `go-mod-vendor` - Runs `go mod vendor`, requires Go
 
 Hooks which naturally operate on files (`go-fmt`, `go-imports`, `go-critic`, and
 `go-cyclo`) use the repository-relative filenames passed by pre-commit. Hooks
-which operate on packages or modules run once across every module and do not
-accept pre-commit's filename arguments. `vendor` and `.git` directories are
-excluded when modules are discovered.
-
-Module discovery uses [`fd`](https://github.com/sharkdp/fd) when it is available
-and falls back to POSIX `find`; installing `fd` is optional.
+which operate on packages or modules resolve each filtered filename to its
+nearest owning `go.mod`, then run once per selected module. This means hook-level
+`files` and `exclude` settings are respected even in multi-module repositories.
 
 ## Requirements
 **Go 1.24** or later

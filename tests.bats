@@ -44,7 +44,7 @@ run_script() {
 }
 
 @test "run-go-build.sh" {
-  run_script "run-go-build.sh"
+  run_script "run-go-build.sh" main.go
   [ "$status" -eq 0 ]
   [[ "$output" == *"Go build succeeded"* ]]
 }
@@ -56,7 +56,7 @@ run_script() {
 }
 
 @test "run-go-cyclo.sh" {
-  run_script "run-go-cyclo.sh" "-over=10" "."
+  run_script "run-go-cyclo.sh" "-over=10" main.go
   echo "Output: $output"
   echo "Status: $status"
   [ "$status" -eq 0 ]
@@ -75,7 +75,7 @@ run_script() {
 
 @test "run-go-generate.sh" {
   echo '//go:generate echo "Generated"' >> main.go
-  run_script "run-go-generate.sh" .
+  run_script "run-go-generate.sh" main.go
   [ "$status" -eq 0 ]
   [[ "$output" == *"Go generate completed successfully"* ]]
 }
@@ -91,19 +91,19 @@ run_script() {
 }
 
 @test "run-go-lint.sh" {
-  run_script "run-go-lint.sh" .
+  run_script "run-go-lint.sh" main.go
   [ "$status" -eq 0 ]
   [[ "$output" == *"completed successfully"* ]]
 }
 
 @test "run-go-mod-tidy.sh" {
-  run_script "run-go-mod-tidy.sh"
+  run_script "run-go-mod-tidy.sh" main.go
   [ "$status" -eq 0 ]
   [[ "$output" == *"go.mod and go.sum files are tidy"* ]]
 }
 
 @test "run-go-mod-vendor.sh" {
-  run_script "run-go-mod-vendor.sh"
+  run_script "run-go-mod-vendor.sh" main.go
   echo "Output: $output"
   echo "Status: $status"
   [ "$status" -eq 0 ]
@@ -116,20 +116,33 @@ run_script() {
 import "testing"
 
 func TestMain(t *testing.T) {}' > main_test.go
-  run_script "run-go-unit-tests.sh" .
+  run_script "run-go-unit-tests.sh" main.go
   [ "$status" -eq 0 ]
   [[ "$output" == *"All Go unit tests passed successfully"* ]]
 }
 
 @test "run-go-vet.sh" {
-  run_script "run-go-vet.sh" .
+  run_script "run-go-vet.sh" main.go
   [ "$status" -eq 0 ]
   [[ "$output" == *"Go vet succeeded for all packages"* ]]
 }
 
 @test "run-golangci-lint.sh" {
-  run_script "run-golangci-lint.sh" .
+  run_script "run-golangci-lint.sh" main.go
   echo "Output: $output"
   echo "Status: $status"
   [ "$status" -eq 0 ]
+}
+
+@test "module hooks do not scan modules excluded by pre-commit" {
+  mkdir -p example/golang/e2e
+  (cd example/golang/e2e && go mod init example.com/e2e)
+  go work init .
+
+  printf 'package e2e\n' > example/golang/e2e/e2e.go
+
+  run_script "run-go-unit-tests.sh" main.go
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"Running tests in ."* ]]
+  [[ "$output" != *"example/golang/e2e"* ]]
 }
