@@ -9,8 +9,9 @@ if ! command -v staticcheck &> /dev/null; then
 fi
 
 source "$(dirname "${BASH_SOURCE[0]}")/_go-hook-lib.sh"
+partition_go_hook_arguments "$@"
 
-run_in_go_modules "Running staticcheck" staticcheck ./... || {
+run_in_selected_go_modules "Running staticcheck" staticcheck "${HOOK_ARGS[@]}" ./... || {
   printf 'Linting failed for one or more modules.\n'
   exit 1
 }

@@ -3,8 +3,9 @@
 set -euo pipefail
 
 source "$(dirname "${BASH_SOURCE[0]}")/_go-hook-lib.sh"
+partition_go_hook_arguments "$@"
 
-if ! run_in_go_modules "Running tests" go test "$@" ./...; then
+if ! run_in_selected_go_modules "Running tests" go test "${HOOK_ARGS[@]}" ./...; then
   printf 'Go unit tests failed.\n'
   exit 1
 fi
